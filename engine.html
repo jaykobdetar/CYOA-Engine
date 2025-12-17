@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Own Adventure</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(145deg, #0d0d0d 0%, #1a1a1a 50%, #0d0d0d 100%);
+            color: #d0d0d0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header / Controls */
+        header {
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid #2a2a2a;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            border: 1px solid #333;
+            padding: 0.5rem 0.75rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4a4a4a;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+        }
+
+        input::placeholder {
+            color: #555;
+        }
+
+        #story-folder {
+            width: 140px;
+        }
+
+        #page-jump {
+            width: 90px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        button {
+            background: linear-gradient(180deg, #2a2a2a 0%, #222 100%);
+            color: #ccc;
+            border: 1px solid #3a3a3a;
+            padding: 0.5rem 1rem;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: linear-gradient(180deg, #333 0%, #2a2a2a 100%);
+            border-color: #4a4a4a;
+            color: #fff;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 2rem;
+            overflow-y: auto;
+        }
+
+        #content {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* Menu Screen */
+        #menu {
+            text-align: center;
+            padding-top: 15vh;
+        }
+
+        #menu h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            color: #888;
+            margin-bottom: 1rem;
+            letter-spacing: 0.1em;
+        }
+
+        #menu p {
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        /* Game Screen */
+        #game {
+            display: none;
+        }
+
+        #story {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 1.15rem;
+            line-height: 1.85;
+            color: #c8c8c8;
+            margin-bottom: 2.5rem;
+        }
+
+        #story p {
+            margin-bottom: 1.25rem;
+            text-indent: 0;
+        }
+
+        #story p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Inline images */
+        .story-image {
+            display: block;
+            max-width: 100%;
+            margin: 1.5rem auto;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .story-image.size-small {
+            max-height: 200px;
+            width: auto;
+        }
+
+        .story-image.size-medium {
+            max-height: 400px;
+            width: auto;
+        }
+
+        /* Videos */
+        .story-video {
+            display: block;
+            max-width: 100%;
+            margin: 1.5rem auto;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            background: #000;
+        }
+
+        /* Choices */
+        #choices {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        #choices button {
+            background: linear-gradient(180deg, #1e1e1e 0%, #181818 100%);
+            border: 1px solid #2a2a2a;
+            padding: 1rem 1.25rem;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 1rem;
+            text-align: left;
+            color: #aaa;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #choices button::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #444;
+            transition: background 0.2s, width 0.2s;
+        }
+
+        #choices button:hover {
+            background: linear-gradient(180deg, #252525 0%, #1e1e1e 100%);
+            border-color: #3a3a3a;
+            color: #ddd;
+        }
+
+        #choices button:hover::before {
+            background: #666;
+            width: 4px;
+        }
+
+        #choices button.continue-btn {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+        }
+
+        #choices button.continue-btn::before {
+            display: none;
+        }
+
+        /* Ending */
+        #ending {
+            display: none;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        #ending strong {
+            display: block;
+            font-size: 1.1rem;
+            color: #888;
+            margin-bottom: 1rem;
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        /* Footer / Status */
+        footer {
+            background: rgba(0, 0, 0, 0.4);
+            border-top: 1px solid #2a2a2a;
+            padding: 0.75rem 2rem;
+            display: none;
+            justify-content: center;
+            gap: 3rem;
+            font-size: 0.8rem;
+        }
+
+        .status-item {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .status-label {
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-value {
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #888;
+        }
+
+        /* Error */
+        .error {
+            color: #a66;
+            font-style: italic;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            main {
+                padding: 2rem 1.25rem;
+            }
+
+            #story {
+                font-size: 1.05rem;
+            }
+
+            footer {
+                gap: 1.5rem;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="control-group">
+            <label>Story</label>
+            <button id="load-story">📁 Open Folder</button>
+            <span id="folder-name" style="color: #888; font-size: 0.85rem;"></span>
+        </div>
+        <div class="control-group">
+            <label for="page-jump">Jump to</label>
+            <input type="text" id="page-jump" placeholder="3ab">
+            <button id="jump-btn">Go</button>
+        </div>
+        <div class="control-group">
+            <button id="refresh-btn" title="Reload current page (bypass cache)">↻ Refresh</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="content">
+            <div id="menu">
+                <h1>Choose Your Own Adventure</h1>
+                <p>Click "Open Folder" to select a story folder and begin.</p>
+                <p style="margin-top: 2rem; font-size: 0.8rem; color: #555;">⚠️ Only open story folders from sources you trust.</p>
+            </div>
+
+            <div id="game">
+                <div id="story"></div>
+                <div id="choices"></div>
+                <div id="ending">
+                    <strong>The End</strong>
+                    <button id="restart">Start Over</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer id="status">
+        <div class="status-item">
+            <span class="status-label">Page</span>
+            <span class="status-value" id="current-page-display">1</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Save</span>
+            <span class="status-value" id="save-code">1</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Path</span>
+            <span class="status-value" id="log-content">—</span>
+        </div>
+    </footer>
+
+    <script>
+        let currentPage = 1;
+        let currentPath = '';
+        let choiceLog = [];
+        let storyFolder = '';
+        let storyFiles = {};  // Map of filename -> file handle or content
+        let storyDirHandle = null;
+        let assetsDirHandle = null;
+
+        const loadStoryBtn = document.getElementById('load-story');
+        const folderNameEl = document.getElementById('folder-name');
+        const pageJumpInput = document.getElementById('page-jump');
+        const jumpBtn = document.getElementById('jump-btn');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const menuEl = document.getElementById('menu');
+        const gameEl = document.getElementById('game');
+        const storyEl = document.getElementById('story');
+        const choicesEl = document.getElementById('choices');
+        const endingEl = document.getElementById('ending');
+        const statusEl = document.getElementById('status');
+        const currentPageDisplay = document.getElementById('current-page-display');
+        const saveCodeEl = document.getElementById('save-code');
+        const logContentEl = document.getElementById('log-content');
+        const restartBtn = document.getElementById('restart');
+
+        // LocalStorage helpers
+        function saveProgress() {
+            const saveData = {
+                page: currentPage,
+                path: currentPath
+            };
+            localStorage.setItem(`cyoa_${storyFolder}`, JSON.stringify(saveData));
+        }
+
+        function loadProgress(folder) {
+            try {
+                const data = localStorage.getItem(`cyoa_${folder}`);
+                if (data) {
+                    return JSON.parse(data);
+                }
+            } catch (e) {}
+            return null;
+        }
+
+        function clearProgress() {
+            localStorage.removeItem(`cyoa_${storyFolder}`);
+        }
+
+        function parsePageCode(code) {
+            const match = code.match(/^(\d+)([ab]*)$/i);
+            if (!match) return null;
+            return {
+                page: parseInt(match[1], 10),
+                path: match[2].toLowerCase()
+            };
+        }
+
+        function getCurrentSaveCode() {
+            if (currentPage === 1 && currentPath === '') return '1';
+            return `${currentPage}${currentPath}`;
+        }
+
+        function cacheBust(url) {
+            const separator = url.includes('?') ? '&' : '?';
+            return `${url}${separator}_=${Date.now()}`;
+        }
+
+        // Store blob URLs for assets
+        let assetBlobUrls = {};
+
+        async function getAssetUrl(assetName) {
+            // Check cache first
+            if (assetBlobUrls[assetName]) {
+                return assetBlobUrls[assetName];
+            }
+
+            if (!assetsDirHandle) return '';
+
+            try {
+                const fileHandle = await assetsDirHandle.getFileHandle(assetName);
+                const file = await fileHandle.getFile();
+                const blobUrl = URL.createObjectURL(file);
+                assetBlobUrls[assetName] = blobUrl;
+                return blobUrl;
+            } catch (e) {
+                return '';
+            }
+        }
+
+        async function processAssets(text) {
+            // Replace {assetName} or {assetName:size} with <img> or <video> tags
+            // Sizes: small, medium (default is full size)
+            const regex = /\{([^}:]+)(?::(\w+))?\}/g;
+            const matches = [...text.matchAll(regex)];
+            
+            let result = text;
+            for (const match of matches) {
+                const [fullMatch, assetName, sizeModifier] = match;
+                let src = assetName;
+                const sizeClass = sizeModifier ? `size-${sizeModifier}` : '';
+                
+                // Check if it's a video
+                if (src.match(/\.(mp4|webm|mov)$/i)) {
+                    const url = await getAssetUrl(src);
+                    if (url) {
+                        result = result.replace(fullMatch, `<video src="${url}" class="story-video" controls preload="none"></video>`);
+                    } else {
+                        result = result.replace(fullMatch, '');
+                    }
+                } else {
+                    // Image - try with extension first, then .png
+                    if (!src.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)) {
+                        src = assetName + '.png';
+                    }
+                    const url = await getAssetUrl(src);
+                    if (url) {
+                        const classes = ['story-image', sizeClass].filter(c => c).join(' ');
+                        result = result.replace(fullMatch, `<img src="${url}" alt="${assetName}" class="${classes}">`);
+                    } else {
+                        result = result.replace(fullMatch, '');
+                    }
+                }
+            }
+            
+            return result;
+        }
+
+        async function formatStoryText(text) {
+            // Process assets first (before sanitization so img/video tags are created)
+            let processed = await processAssets(text);
+            
+            // Split into paragraphs and wrap
+            const paragraphs = processed.split(/\n\n+/);
+            const html = paragraphs
+                .map(p => p.trim())
+                .filter(p => p)
+                .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+                .join('');
+            
+            // Sanitize with DOMPurify - allow img, video, and basic formatting
+            return DOMPurify.sanitize(html, {
+                ALLOWED_TAGS: ['p', 'br', 'img', 'video', 'strong', 'em', 'b', 'i'],
+                ALLOWED_ATTR: ['src', 'alt', 'class', 'controls', 'preload']
+            });
+        }
+
+        async function loadPage(pageNum, path) {
+            const filename = pageNum === 1 && path === '' ? '1.txt' : `${pageNum}${path}.txt`;
+            
+            try {
+                const fileHandle = await storyDirHandle.getFileHandle(filename);
+                const file = await fileHandle.getFile();
+                const text = await file.text();
+                await displayPage(text);
+            } catch (e) {
+                showEnding();
+            }
+        }
+
+        async function displayPage(text) {
+            const choicePattern = /^([ab])\)\s*(.+)$/gm;
+            const choices = [];
+            let match;
+            let storyText = text;
+
+            while ((match = choicePattern.exec(text)) !== null) {
+                // Sanitize choice text - only allow plain text
+                choices.push({ letter: match[1], text: DOMPurify.sanitize(match[2], { ALLOWED_TAGS: [] }) });
+            }
+
+            if (choices.length > 0) {
+                storyText = text.replace(/^[ab]\)\s*.+$/gm, '').trim();
+            }
+
+            storyEl.innerHTML = await formatStoryText(storyText);
+            choicesEl.innerHTML = '';
+
+            if (choices.length > 0) {
+                choices.forEach(choice => {
+                    const btn = document.createElement('button');
+                    btn.innerHTML = `<strong>${choice.letter})</strong>&nbsp; ${choice.text}`;
+                    btn.onclick = () => makeChoice(choice.letter);
+                    choicesEl.appendChild(btn);
+                });
+            } else {
+                // No choices - show Continue button
+                const btn = document.createElement('button');
+                btn.innerHTML = 'Continue';
+                btn.classList.add('continue-btn');
+                btn.onclick = () => {
+                    currentPage++;
+                    updateStatus();
+                    saveProgress();
+                    loadPage(currentPage, currentPath);
+                };
+                choicesEl.appendChild(btn);
+            }
+        }
+
+        function makeChoice(letter) {
+            choiceLog.push(letter);
+            currentPath += letter;
+            currentPage++;
+            updateStatus();
+            saveProgress();
+            loadPage(currentPage, currentPath);
+        }
+
+        function updateStatus() {
+            currentPageDisplay.textContent = currentPage;
+            saveCodeEl.textContent = getCurrentSaveCode();
+            logContentEl.textContent = choiceLog.length > 0 
+                ? choiceLog.join(' → ') 
+                : '—';
+        }
+
+        function showEnding() {
+            endingEl.style.display = 'block';
+            choicesEl.innerHTML = '';
+            clearProgress(); // Clear save on ending
+        }
+
+        function hideEnding() {
+            endingEl.style.display = 'none';
+        }
+
+        function startGame(page = 1, path = '', skipSaveCheck = false) {
+            currentPage = page;
+            currentPath = path;
+            choiceLog = path.split('').filter(c => c);
+            
+            menuEl.style.display = 'none';
+            gameEl.style.display = 'block';
+            statusEl.style.display = 'flex';
+            hideEnding();
+            updateStatus();
+            saveProgress();
+            loadPage(currentPage, currentPath);
+        }
+
+        function restart() {
+            clearProgress();
+            startGame(1, '');
+        }
+
+        async function openStoryFolder() {
+            try {
+                // Request folder access
+                storyDirHandle = await window.showDirectoryPicker();
+                storyFolder = storyDirHandle.name;
+                folderNameEl.textContent = storyFolder;
+                
+                // Clear old asset URLs
+                for (const url of Object.values(assetBlobUrls)) {
+                    URL.revokeObjectURL(url);
+                }
+                assetBlobUrls = {};
+                
+                // Try to get assets subfolder
+                try {
+                    assetsDirHandle = await storyDirHandle.getDirectoryHandle('assets');
+                } catch (e) {
+                    assetsDirHandle = null;
+                }
+                
+                // Check for saved progress
+                const saved = loadProgress(storyFolder);
+                if (saved && (saved.page > 1 || saved.path)) {
+                    if (confirm(`Resume from page ${saved.page}${saved.path || ''}?`)) {
+                        startGame(saved.page, saved.path);
+                    } else {
+                        startGame(1, '');
+                    }
+                } else {
+                    startGame(1, '');
+                }
+            } catch (e) {
+                // User cancelled or error
+                if (e.name !== 'AbortError') {
+                    console.error('Error opening folder:', e);
+                }
+            }
+        }
+
+        loadStoryBtn.onclick = openStoryFolder;
+
+        jumpBtn.onclick = () => {
+            if (!storyDirHandle) {
+                alert('Please open a story folder first.');
+                return;
+            }
+            
+            const code = pageJumpInput.value.trim();
+            if (!code) return;
+            
+            const parsed = parsePageCode(code);
+            if (!parsed) {
+                gameEl.style.display = 'block';
+                menuEl.style.display = 'none';
+                storyEl.innerHTML = '<p class="error">Invalid page code. Use format like "1", "3ab", "5baa".</p>';
+                choicesEl.innerHTML = '';
+                return;
+            }
+            
+            startGame(parsed.page, parsed.path);
+            pageJumpInput.value = '';
+        };
+
+        refreshBtn.onclick = () => {
+            if (gameEl.style.display !== 'none' && storyDirHandle) {
+                loadPage(currentPage, currentPath);
+            }
+        };
+
+        pageJumpInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') jumpBtn.click();
+        });
+
+        restartBtn.onclick = restart;
+    </script>
+</body>
+</html>

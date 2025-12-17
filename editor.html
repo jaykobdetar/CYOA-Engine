@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYOA Story Editor</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #1a1a1a;
+            color: #d0d0d0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            background: #0d0d0d;
+            border-bottom: 1px solid #333;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        header h1 {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #888;
+            letter-spacing: 0.05em;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .header-controls input {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            padding: 0.4rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            width: 180px;
+        }
+
+        .header-controls input:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        button {
+            background: linear-gradient(180deg, #2a2a2a 0%, #222 100%);
+            color: #ccc;
+            border: 1px solid #3a3a3a;
+            padding: 0.4rem 1rem;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        button:hover {
+            background: linear-gradient(180deg, #333 0%, #2a2a2a 100%);
+            border-color: #4a4a4a;
+            color: #fff;
+        }
+
+        button.primary {
+            background: linear-gradient(180deg, #2d4a2d 0%, #1e3a1e 100%);
+            border-color: #3d5a3d;
+        }
+
+        button.primary:hover {
+            background: linear-gradient(180deg, #3d5a3d 0%, #2d4a2d 100%);
+            border-color: #4d6a4d;
+        }
+
+        button.danger {
+            background: linear-gradient(180deg, #4a2d2d 0%, #3a1e1e 100%);
+            border-color: #5a3d3d;
+        }
+
+        button.danger:hover {
+            background: linear-gradient(180deg, #5a3d3d 0%, #4a2d2d 100%);
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar - Pages */
+        .sidebar {
+            width: 280px;
+            background: #151515;
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #666;
+        }
+
+        .page-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .page-item {
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            transition: background 0.15s;
+        }
+
+        .page-item:hover {
+            background: #252525;
+        }
+
+        .page-item.active {
+            background: #2a3a2a;
+            border: 1px solid #3a4a3a;
+        }
+
+        .page-item .page-id {
+            font-family: 'Consolas', monospace;
+            color: #8a8;
+        }
+
+        .page-item .page-type {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            background: #333;
+            color: #888;
+        }
+
+        .page-item .page-type.choice {
+            background: #2a3a4a;
+            color: #8ac;
+        }
+
+        .page-item .page-type.ending {
+            background: #4a3a2a;
+            color: #ca8;
+        }
+
+        /* Editor Panel */
+        .editor-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .editor-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #333;
+            background: #1d1d1d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-header h2 {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #aaa;
+        }
+
+        .editor-header h2 span {
+            font-family: 'Consolas', monospace;
+            color: #8a8;
+        }
+
+        .page-options {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .page-options label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            color: #888;
+            cursor: pointer;
+        }
+
+        .page-options input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .editor-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            gap: 1rem;
+            overflow-y: auto;
+        }
+
+        .editor-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .editor-section label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #666;
+        }
+
+        textarea {
+            background: #0d0d0d;
+            border: 1px solid #333;
+            color: #d0d0d0;
+            padding: 1rem;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 1rem;
+            line-height: 1.7;
+            border-radius: 4px;
+            resize: none;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #555;
+        }
+
+        #page-content {
+            flex: 1;
+            min-height: 200px;
+        }
+
+        .choices-section {
+            display: none;
+            gap: 0.75rem;
+        }
+
+        .choices-section.visible {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .choice-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .choice-row .choice-label {
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: #8ac;
+            width: 20px;
+        }
+
+        .choice-row input {
+            flex: 1;
+            background: #0d0d0d;
+            border: 1px solid #333;
+            color: #d0d0d0;
+            padding: 0.6rem 0.75rem;
+            font-family: inherit;
+            font-size: 0.95rem;
+            border-radius: 4px;
+        }
+
+        .choice-row input:focus {
+            outline: none;
+            border-color: #555;
+        }
+
+        /* Assets Panel */
+        .assets-panel {
+            width: 260px;
+            background: #151515;
+            border-left: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .assets-header {
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .assets-header h2 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #666;
+        }
+
+        .assets-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .asset-preview {
+            padding: 0.5rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .asset-preview img,
+        .asset-preview video {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 4px;
+        }
+
+        .asset-hint {
+            padding: 1rem;
+            font-size: 0.8rem;
+            color: #555;
+            text-align: center;
+        }
+
+        /* File input styling */
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* Draggable assets */
+        .asset-item {
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 2px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            background: #1d1d1d;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .asset-item:active {
+            cursor: grabbing;
+        }
+
+        .asset-item.dragging {
+            opacity: 0.5;
+        }
+
+        .asset-item .asset-name {
+            font-family: 'Consolas', monospace;
+            color: #aaa;
+        }
+
+        .asset-item .asset-name:hover {
+            color: #fff;
+        }
+
+        .asset-item button {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        /* Textarea drop target */
+        #page-content.drag-over {
+            border-color: #5a8a5a;
+            background: #0d1a0d;
+        }
+
+        /* Empty state */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #555;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .empty-state p {
+            margin-bottom: 1rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.visible {
+            display: flex;
+        }
+
+        .modal {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal h3 {
+            font-size: 1rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            color: #aaa;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+
+        /* Draft selector */
+        .draft-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .draft-controls select {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            padding: 0.4rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            cursor: pointer;
+            max-width: 150px;
+        }
+
+        .draft-controls select:focus {
+            outline: none;
+            border-color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>CYOA Story Editor</h1>
+        <div class="header-controls">
+            <div class="draft-controls">
+                <input type="text" id="story-name" placeholder="Story name" value="my-story">
+                <select id="draft-select" onchange="selectDraft()">
+                    <option value="">-- Drafts --</option>
+                </select>
+            </div>
+            <button onclick="saveToStorage()">Save</button>
+            <button onclick="newDraft()">New</button>
+            <button class="danger" onclick="deleteDraft()">Delete</button>
+            <button class="primary" onclick="exportStory()">Export ZIP</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Pages Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Pages</h2>
+                <button onclick="addPage()">+ Add</button>
+            </div>
+            <div class="page-tree" id="page-tree"></div>
+        </div>
+
+        <!-- Editor Panel -->
+        <div class="editor-panel">
+            <div id="editor-empty" class="empty-state">
+                <p>Select a page from the sidebar or create a new one to start editing.</p>
+                <button onclick="addPage()">Create First Page</button>
+            </div>
+            <div id="editor-main" style="display: none; flex-direction: column; height: 100%;">
+                <div class="editor-header">
+                    <h2>Editing: <span id="current-page-id">1</span>.txt</h2>
+                    <div class="page-options">
+                        <label>
+                            <input type="checkbox" id="has-choices" onchange="toggleChoices(true)">
+                            Has choices
+                        </label>
+                        <label>
+                            <input type="checkbox" id="is-ending" onchange="toggleEnding()">
+                            Is ending
+                        </label>
+                        <button class="danger" onclick="deletePage()">Delete</button>
+                    </div>
+                </div>
+                <div class="editor-content">
+                    <div class="editor-section" style="flex: 1; display: flex; flex-direction: column;">
+                        <label>Story Text</label>
+                        <textarea id="page-content" placeholder="Write your story text here...
+
+Use {assetname} to embed images or videos.
+Example: {cave} or {intro.mp4}"></textarea>
+                    </div>
+                    <div class="choices-section" id="choices-section">
+                        <label>Choices</label>
+                        <div class="choice-row">
+                            <span class="choice-label">a)</span>
+                            <input type="text" id="choice-a" placeholder="First choice text...">
+                        </div>
+                        <div class="choice-row">
+                            <span class="choice-label">b)</span>
+                            <input type="text" id="choice-b" placeholder="Second choice text...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assets Panel -->
+        <div class="assets-panel">
+            <div class="assets-header">
+                <h2>Assets</h2>
+                <div class="file-input-wrapper">
+                    <button style="width: 100%;">+ Add Asset</button>
+                    <input type="file" id="asset-input" accept="image/*,video/*" multiple onchange="handleAssetUpload(event)">
+                </div>
+            </div>
+            <div id="asset-preview" class="asset-preview" style="display: none;"></div>
+            <div class="assets-list" id="assets-list">
+                <div class="asset-hint">
+                    Upload images or videos to use in your story with {filename} syntax.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal">
+            <h3>Delete this page?</h3>
+            <p>This will also delete all pages that branch from this one.</p>
+            <div class="modal-buttons">
+                <button onclick="closeModal()">Cancel</button>
+                <button class="danger" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        // State
+        let pages = {};
+        let assets = {};
+        let currentPageId = null;
+
+        // Sanitize filename to prevent path traversal
+        function sanitizeFilename(name) {
+            return name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/\.{2,}/g, '.');
+        }
+
+        // Initialize with page 1
+        function init() {
+            if (Object.keys(pages).length === 0) {
+                pages['1'] = {
+                    content: '',
+                    hasChoices: true,
+                    isEnding: false,
+                    choiceA: '',
+                    choiceB: ''
+                };
+            }
+            renderPageTree();
+            selectPage('1');
+            setupTextareaDrop();
+            updateDraftDropdown();
+        }
+
+        // Generate child page IDs
+        function getChildIds(pageId) {
+            const parsed = parsePageId(pageId);
+            const nextNum = parsed.num + 1;
+            const basePath = parsed.path;
+            return {
+                a: `${nextNum}${basePath}a`,
+                b: `${nextNum}${basePath}b`
+            };
+        }
+
+        function parsePageId(id) {
+            const match = id.match(/^(\d+)([ab]*)$/);
+            return {
+                num: parseInt(match[1]),
+                path: match[2] || ''
+            };
+        }
+
+        // Get all descendant page IDs
+        function getDescendants(pageId) {
+            const descendants = [];
+            const queue = [pageId];
+            
+            while (queue.length > 0) {
+                const current = queue.shift();
+                const children = getChildIds(current);
+                
+                for (const childId of [children.a, children.b]) {
+                    if (pages[childId]) {
+                        descendants.push(childId);
+                        queue.push(childId);
+                    }
+                }
+            }
+            
+            return descendants;
+        }
+
+        // Render page tree
+        function renderPageTree() {
+            const tree = document.getElementById('page-tree');
+            const sortedIds = Object.keys(pages).sort((a, b) => {
+                const pa = parsePageId(a);
+                const pb = parsePageId(b);
+                if (pa.num !== pb.num) return pa.num - pb.num;
+                return pa.path.localeCompare(pb.path);
+            });
+
+            tree.innerHTML = sortedIds.map(id => {
+                const page = pages[id];
+                const typeClass = page.isEnding ? 'ending' : (page.hasChoices ? 'choice' : '');
+                const typeLabel = page.isEnding ? 'END' : (page.hasChoices ? 'A/B' : 'AUTO');
+                const activeClass = id === currentPageId ? 'active' : '';
+                
+                return `
+                    <div class="page-item ${activeClass}" onclick="selectPage('${id}')">
+                        <span class="page-id">${id}.txt</span>
+                        <span class="page-type ${typeClass}">${typeLabel}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Select a page for editing
+        function selectPage(id) {
+            // Save current page first
+            if (currentPageId && pages[currentPageId]) {
+                saveCurrentPage();
+            }
+
+            currentPageId = id;
+            const page = pages[id];
+
+            document.getElementById('editor-empty').style.display = 'none';
+            document.getElementById('editor-main').style.display = 'flex';
+            document.getElementById('current-page-id').textContent = id;
+            document.getElementById('page-content').value = page.content || '';
+            document.getElementById('has-choices').checked = page.hasChoices;
+            document.getElementById('is-ending').checked = page.isEnding;
+            document.getElementById('choice-a').value = page.choiceA || '';
+            document.getElementById('choice-b').value = page.choiceB || '';
+
+            // Don't create children when just loading a page
+            toggleChoices(false);
+            renderPageTree();
+        }
+
+        // Save current page state
+        function saveCurrentPage() {
+            if (!currentPageId || !pages[currentPageId]) return;
+
+            pages[currentPageId] = {
+                content: document.getElementById('page-content').value,
+                hasChoices: document.getElementById('has-choices').checked,
+                isEnding: document.getElementById('is-ending').checked,
+                choiceA: document.getElementById('choice-a').value,
+                choiceB: document.getElementById('choice-b').value
+            };
+        }
+
+        // Toggle choices visibility
+        function toggleChoices(createChildren = true) {
+            const hasChoices = document.getElementById('has-choices').checked;
+            const isEnding = document.getElementById('is-ending').checked;
+            const section = document.getElementById('choices-section');
+            
+            if (hasChoices && !isEnding) {
+                section.classList.add('visible');
+                if (createChildren) {
+                    ensureChildPages();
+                }
+            } else {
+                section.classList.remove('visible');
+            }
+
+            // Uncheck ending if choices are enabled
+            if (hasChoices && isEnding) {
+                document.getElementById('is-ending').checked = false;
+            }
+
+            saveCurrentPage();
+            renderPageTree();
+        }
+
+        // Toggle ending status
+        function toggleEnding() {
+            const isEnding = document.getElementById('is-ending').checked;
+            
+            if (isEnding) {
+                document.getElementById('has-choices').checked = false;
+                document.getElementById('choices-section').classList.remove('visible');
+            }
+
+            saveCurrentPage();
+            renderPageTree();
+        }
+
+        // Ensure child pages exist when choices are enabled
+        function ensureChildPages() {
+            if (!currentPageId) return;
+            
+            const children = getChildIds(currentPageId);
+            
+            if (!pages[children.a]) {
+                pages[children.a] = {
+                    content: '',
+                    hasChoices: true,
+                    isEnding: false,
+                    choiceA: '',
+                    choiceB: ''
+                };
+            }
+            
+            if (!pages[children.b]) {
+                pages[children.b] = {
+                    content: '',
+                    hasChoices: true,
+                    isEnding: false,
+                    choiceA: '',
+                    choiceB: ''
+                };
+            }
+            
+            renderPageTree();
+        }
+
+        // Add a new page
+        function addPage() {
+            // Find the next available page number at root level
+            let nextNum = 1;
+            while (pages[String(nextNum)]) {
+                nextNum++;
+            }
+            
+            // Or if we have a current page, add a continuation
+            if (currentPageId) {
+                const parsed = parsePageId(currentPageId);
+                const nextId = `${parsed.num + 1}${parsed.path}`;
+                if (!pages[nextId]) {
+                    pages[nextId] = {
+                        content: '',
+                        hasChoices: true,
+                        isEnding: false,
+                        choiceA: '',
+                        choiceB: ''
+                    };
+                    renderPageTree();
+                    selectPage(nextId);
+                    return;
+                }
+            }
+
+            const newId = String(nextNum);
+            pages[newId] = {
+                content: '',
+                hasChoices: true,
+                isEnding: false,
+                choiceA: '',
+                choiceB: ''
+            };
+            
+            renderPageTree();
+            selectPage(newId);
+        }
+
+        // Delete page
+        function deletePage() {
+            if (!currentPageId || currentPageId === '1') {
+                alert("Cannot delete the first page.");
+                return;
+            }
+            document.getElementById('delete-modal').classList.add('visible');
+        }
+
+        function confirmDelete() {
+            const descendants = getDescendants(currentPageId);
+            
+            // Delete descendants first
+            for (const id of descendants) {
+                delete pages[id];
+            }
+            
+            // Delete current page
+            delete pages[currentPageId];
+            
+            closeModal();
+            currentPageId = null;
+            renderPageTree();
+            
+            // Select first available page
+            const remaining = Object.keys(pages).sort()[0];
+            if (remaining) {
+                selectPage(remaining);
+            } else {
+                document.getElementById('editor-empty').style.display = 'flex';
+                document.getElementById('editor-main').style.display = 'none';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('delete-modal').classList.remove('visible');
+        }
+
+        // Asset handling
+        function handleAssetUpload(event) {
+            const files = event.target.files;
+            
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // Sanitize filename
+                    const safeName = sanitizeFilename(file.name);
+                    assets[safeName] = {
+                        data: e.target.result,
+                        type: file.type
+                    };
+                    renderAssetsList();
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            event.target.value = '';
+        }
+
+        function renderAssetsList() {
+            const list = document.getElementById('assets-list');
+            const names = Object.keys(assets).sort();
+            
+            if (names.length === 0) {
+                list.innerHTML = '<div class="asset-hint">Upload images or videos to use in your story.<br><br>Drag assets to the text area or click to insert.</div>';
+                return;
+            }
+
+            list.innerHTML = names.map(name => `
+                <div class="asset-item" draggable="true" data-filename="${name}">
+                    <span class="asset-name" onclick="insertAsset('${name}')" title="Click or drag to insert">{${name}}</span>
+                    <button onclick="event.stopPropagation(); deleteAsset('${name}')">×</button>
+                </div>
+            `).join('');
+
+            // Add drag event listeners to each asset
+            list.querySelectorAll('.asset-item').forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+            });
+        }
+
+        let draggedAsset = null;
+
+        function handleDragStart(e) {
+            draggedAsset = e.target.dataset.filename;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'copy';
+            e.dataTransfer.setData('text/plain', `{${draggedAsset}}`);
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedAsset = null;
+        }
+
+        function setupTextareaDrop() {
+            const textarea = document.getElementById('page-content');
+            
+            textarea.addEventListener('dragover', (e) => {
+                if (draggedAsset) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'copy';
+                    textarea.classList.add('drag-over');
+                }
+            });
+
+            textarea.addEventListener('dragleave', (e) => {
+                textarea.classList.remove('drag-over');
+            });
+
+            textarea.addEventListener('drop', (e) => {
+                if (draggedAsset) {
+                    e.preventDefault();
+                    textarea.classList.remove('drag-over');
+                    
+                    // Get drop position in textarea
+                    const text = textarea.value;
+                    const insertion = `{${draggedAsset}}`;
+                    
+                    // Insert at cursor or end
+                    const pos = textarea.selectionStart;
+                    textarea.value = text.slice(0, pos) + insertion + text.slice(pos);
+                    textarea.focus();
+                    textarea.setSelectionRange(pos + insertion.length, pos + insertion.length);
+                    
+                    saveCurrentPage();
+                }
+            });
+        }
+
+        function insertAsset(filename) {
+            const textarea = document.getElementById('page-content');
+            const pos = textarea.selectionStart;
+            const text = textarea.value;
+            const insertion = `{${filename}}`;
+            
+            textarea.value = text.slice(0, pos) + insertion + text.slice(pos);
+            textarea.focus();
+            textarea.setSelectionRange(pos + insertion.length, pos + insertion.length);
+            saveCurrentPage();
+        }
+
+        function deleteAsset(name) {
+            delete assets[name];
+            renderAssetsList();
+            document.getElementById('asset-preview').style.display = 'none';
+        }
+
+        // Save/Load drafts to localStorage
+        const DRAFTS_KEY = 'cyoa_editor_drafts';
+
+        function getDrafts() {
+            try {
+                return JSON.parse(localStorage.getItem(DRAFTS_KEY)) || {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveDrafts(drafts) {
+            localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+        }
+
+        function updateDraftDropdown() {
+            const select = document.getElementById('draft-select');
+            const drafts = getDrafts();
+            const names = Object.keys(drafts).sort();
+            const currentName = document.getElementById('story-name').value;
+
+            select.innerHTML = '<option value="">-- Drafts --</option>' +
+                names.map(name => 
+                    `<option value="${name}" ${name === currentName ? 'selected' : ''}>${name}</option>`
+                ).join('');
+        }
+
+        function saveToStorage() {
+            saveCurrentPage();
+            const storyName = document.getElementById('story-name').value.trim();
+            
+            if (!storyName) {
+                alert('Please enter a story name.');
+                return;
+            }
+
+            const drafts = getDrafts();
+            drafts[storyName] = {
+                pages,
+                assets,
+                savedAt: new Date().toISOString()
+            };
+            saveDrafts(drafts);
+            updateDraftDropdown();
+            
+            // Brief visual feedback
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Saved!';
+            setTimeout(() => btn.textContent = originalText, 1000);
+        }
+
+        function selectDraft() {
+            const select = document.getElementById('draft-select');
+            const selectedName = select.value;
+            
+            if (!selectedName) return;
+
+            const drafts = getDrafts();
+            const draft = drafts[selectedName];
+            
+            if (!draft) {
+                alert('Draft not found.');
+                return;
+            }
+
+            pages = draft.pages || {};
+            assets = draft.assets || {};
+            document.getElementById('story-name').value = selectedName;
+            
+            currentPageId = null;
+            renderPageTree();
+            renderAssetsList();
+            
+            const firstPage = Object.keys(pages).sort()[0];
+            if (firstPage) {
+                selectPage(firstPage);
+            } else {
+                document.getElementById('editor-empty').style.display = 'flex';
+                document.getElementById('editor-main').style.display = 'none';
+            }
+        }
+
+        function newDraft() {
+            if (Object.keys(pages).length > 0) {
+                if (!confirm('Start a new draft? Unsaved changes will be lost.')) {
+                    return;
+                }
+            }
+
+            pages = {
+                '1': {
+                    content: '',
+                    hasChoices: true,
+                    isEnding: false,
+                    choiceA: '',
+                    choiceB: ''
+                }
+            };
+            assets = {};
+            document.getElementById('story-name').value = 'new-story';
+            document.getElementById('draft-select').value = '';
+            
+            currentPageId = null;
+            renderPageTree();
+            renderAssetsList();
+            selectPage('1');
+        }
+
+        function deleteDraft() {
+            const storyName = document.getElementById('story-name').value.trim();
+            
+            if (!storyName) {
+                alert('No draft selected.');
+                return;
+            }
+
+            const drafts = getDrafts();
+            
+            if (!drafts[storyName]) {
+                alert('This draft has not been saved yet.');
+                return;
+            }
+
+            if (!confirm(`Delete draft "${storyName}"? This cannot be undone.`)) {
+                return;
+            }
+
+            delete drafts[storyName];
+            saveDrafts(drafts);
+            updateDraftDropdown();
+            
+            // Start fresh
+            newDraft();
+        }
+
+        // Export to ZIP
+        async function exportStory() {
+            saveCurrentPage();
+            
+            const storyName = sanitizeFilename(document.getElementById('story-name').value || 'my-story');
+            const zip = new JSZip();
+            const folder = zip.folder(storyName);
+            const assetsFolder = folder.folder('assets');
+
+            // Generate page files
+            for (const [id, page] of Object.entries(pages)) {
+                let content = page.content || '';
+                
+                if (page.hasChoices && !page.isEnding) {
+                    if (page.choiceA) {
+                        content += `\n\na) ${page.choiceA}`;
+                    }
+                    if (page.choiceB) {
+                        content += `\nb) ${page.choiceB}`;
+                    }
+                }
+                
+                // Sanitize page ID for filename
+                const safeId = sanitizeFilename(id);
+                folder.file(`${safeId}.txt`, content);
+            }
+
+            // Add assets with sanitized filenames
+            for (const [name, asset] of Object.entries(assets)) {
+                const safeName = sanitizeFilename(name);
+                const base64 = asset.data.split(',')[1];
+                assetsFolder.file(safeName, base64, { base64: true });
+            }
+
+            // Generate and download
+            const blob = await zip.generateAsync({ type: 'blob' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${storyName}.zip`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Auto-save on input
+        document.getElementById('page-content').addEventListener('input', () => saveCurrentPage());
+        document.getElementById('choice-a').addEventListener('input', () => saveCurrentPage());
+        document.getElementById('choice-b').addEventListener('input', () => saveCurrentPage());
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>
