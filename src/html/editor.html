@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYOA Story Editor</title>
+    <link rel="stylesheet" href="../css/editor.css">
+</head>
+<body>
+    <header>
+        <h1>CYOA Story Editor</h1>
+        <div class="header-controls">
+            <div class="draft-controls">
+                <input type="text" id="story-name" placeholder="Story name" value="my-story">
+                <select id="draft-select">
+                    <option value="">-- Drafts --</option>
+                </select>
+            </div>
+            <button onclick="saveToStorage()">Save</button>
+            <button onclick="newDraft()">New</button>
+            <button class="danger" onclick="deleteDraft()">Delete</button>
+            <div class="file-input-wrapper">
+                <button>Import</button>
+                <input type="file" id="import-zip" accept=".zip">
+            </div>
+            <button class="primary" onclick="exportStory()">Export ZIP</button>
+            <button onclick="toggleTheme()" id="theme-toggle" title="Toggle theme">🌙</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Pages Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Pages</h2>
+                <button onclick="addPage()">+ Add</button>
+            </div>
+            <div class="sidebar-toolbar">
+                <input type="text" id="page-search" placeholder="Search pages...">
+                <button id="graph-btn" title="Show story graph">🗺️</button>
+            </div>
+            <div class="page-tree" id="page-tree"></div>
+        </div>
+
+        <!-- Editor Panel -->
+        <div class="editor-panel">
+            <div id="editor-empty" class="empty-state">
+                <p>Select a page from the sidebar or create a new one to start editing.</p>
+                <button onclick="addPage()">Create First Page</button>
+            </div>
+            <div id="editor-main" style="display: none; flex-direction: column; height: 100%;">
+                <div class="editor-header">
+                    <h2>Editing: <span id="current-page-id">1</span>.txt</h2>
+                    <div class="page-options">
+                        <label>
+                            <input type="checkbox" id="has-choices">
+                            Has choices
+                        </label>
+                        <label>
+                            <input type="checkbox" id="is-ending">
+                            Is ending
+                        </label>
+                        <button id="copy-page" title="Copy page">📋</button>
+                        <button id="rename-page" title="Rename page">✏️</button>
+                        <button class="danger" onclick="deletePage()">Delete</button>
+                    </div>
+                </div>
+                <div class="editor-content">
+                    <div class="editor-section" style="flex: 1; display: flex; flex-direction: column;">
+                        <label>
+                            Story Text
+                            <span id="save-status" class="save-status"></span>
+                        </label>
+                        <div class="textarea-wrapper">
+                            <div class="line-numbers" id="line-numbers"></div>
+                            <textarea id="page-content" placeholder="Write your story text here...
+
+Use {assetname} to embed images or videos.
+Example: {cave} or {intro.mp4}
+
+Variables: {set:coins=10} {add:coins=5} {if:coins>=10}text{/if}
+Audio: {music:song.mp3} {sfx:click.wav}
+Goto: {goto:3ab}"></textarea>
+                        </div>
+                    </div>
+                    <div class="choices-section" id="choices-section">
+                        <label>Choices (2-5 options)</label>
+                        <div class="choice-row">
+                            <span class="choice-label">a)</span>
+                            <input type="text" class="choice-text" placeholder="First choice text...">
+                            <input type="text" class="choice-goto goto-input" placeholder="goto">
+                        </div>
+                        <div class="choice-row">
+                            <span class="choice-label">b)</span>
+                            <input type="text" class="choice-text" placeholder="Second choice text...">
+                            <input type="text" class="choice-goto goto-input" placeholder="goto">
+                        </div>
+                        <div class="choice-row" style="display:none;">
+                            <span class="choice-label">c)</span>
+                            <input type="text" class="choice-text" placeholder="Third choice text...">
+                            <input type="text" class="choice-goto goto-input" placeholder="goto">
+                        </div>
+                        <div class="choice-row" style="display:none;">
+                            <span class="choice-label">d)</span>
+                            <input type="text" class="choice-text" placeholder="Fourth choice text...">
+                            <input type="text" class="choice-goto goto-input" placeholder="goto">
+                        </div>
+                        <div class="choice-row" style="display:none;">
+                            <span class="choice-label">e)</span>
+                            <input type="text" class="choice-text" placeholder="Fifth choice text...">
+                            <input type="text" class="choice-goto goto-input" placeholder="goto">
+                        </div>
+                        <button id="add-choice" class="small">+ Add Choice</button>
+                    </div>
+                </div>
+                <div class="stats-bar" id="stats-bar"></div>
+            </div>
+        </div>
+
+        <!-- Assets Panel -->
+        <div class="assets-panel">
+            <div class="assets-header">
+                <h2>Assets</h2>
+                <div class="file-input-wrapper">
+                    <button style="width: 100%;">+ Add Asset</button>
+                    <input type="file" id="asset-input" accept="image/*,video/*,audio/*" multiple>
+                </div>
+            </div>
+            <div id="asset-preview" class="asset-preview" style="display: none;"></div>
+            <div class="assets-list" id="assets-list">
+                <div class="asset-hint">
+                    Upload images, videos, or audio to use in your story with {filename} syntax.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metadata Panel (collapsible) -->
+    <div class="metadata-section" id="metadata-section" style="display: none;">
+        <h3>Story Metadata</h3>
+        <div class="metadata-field">
+            <label for="meta-title">Title</label>
+            <input type="text" id="meta-title" placeholder="Story title">
+        </div>
+        <div class="metadata-field">
+            <label for="meta-author">Author</label>
+            <input type="text" id="meta-author" placeholder="Author name">
+        </div>
+        <div class="metadata-field">
+            <label for="meta-description">Description</label>
+            <textarea id="meta-description" placeholder="Story description"></textarea>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal">
+            <h3>Delete this page?</h3>
+            <p>This will also delete all pages that branch from this one.</p>
+            <div class="modal-buttons">
+                <button onclick="closeModal()">Cancel</button>
+                <button class="danger" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Validation Modal -->
+    <div class="modal-overlay" id="validation-modal">
+        <div class="modal">
+            <h3>Export Validation</h3>
+            <div class="validation-list" id="validation-list"></div>
+            <div class="modal-buttons">
+                <button onclick="closeValidationModal()">Cancel</button>
+                <button class="primary" onclick="proceedExport()">Export Anyway</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape-dagre/2.5.0/cytoscape-dagre.min.js"></script>
+    <script type="module" src="../ts/editor/main.ts"></script>
+</body>
+</html>

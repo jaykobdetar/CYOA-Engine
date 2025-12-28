@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Own Adventure</title>
+    <link rel="stylesheet" href="../css/engine.css">
+</head>
+<body>
+    <header>
+        <div class="control-group">
+            <label>Story</label>
+            <button id="load-story">📁 Open Folder</button>
+            <span id="folder-name"></span>
+        </div>
+        <div class="control-group">
+            <label for="page-jump">Jump to</label>
+            <input type="text" id="page-jump" placeholder="3ab">
+            <button id="jump-btn">Go</button>
+        </div>
+        <div class="control-group">
+            <button id="refresh-btn" title="Reload current page">↻ Refresh</button>
+        </div>
+        <div class="settings-group">
+            <div class="font-size-control" id="font-size-controls"></div>
+            <div class="volume-control">
+                <span>🔊</span>
+                <input type="range" id="volume-slider" min="0" max="100" value="70">
+            </div>
+            <button id="theme-toggle" class="theme-toggle" title="Toggle theme">🌙</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="content">
+            <!-- Menu Screen -->
+            <div id="menu">
+                <h1>Choose Your Own Adventure</h1>
+                <p>Click "Open Folder" to select a story folder and begin.</p>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: #666;">
+                    Or drag and drop a story ZIP file onto this window.
+                </p>
+                <div class="import-options" style="margin-top: 2rem;">
+                    <div class="import-option" id="open-folder-option">
+                        <span class="icon">📁</span>
+                        <span class="label">Open Folder</span>
+                    </div>
+                    <div class="import-option" id="open-zip-option">
+                        <span class="icon">📦</span>
+                        <span class="label">Open ZIP</span>
+                        <input type="file" id="zip-input" accept=".zip">
+                    </div>
+                </div>
+                <p style="margin-top: 3rem; font-size: 0.8rem; color: #555;">
+                    ⚠️ Only open story folders from sources you trust.
+                </p>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="game">
+                <div id="story"></div>
+                <div id="choices"></div>
+                <div id="ending">
+                    <strong>The End</strong>
+                    <button id="restart">Start Over</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Variables Panel -->
+    <div class="variables-panel" id="variables-panel"></div>
+
+    <!-- Audio Player Indicator -->
+    <div class="audio-player" id="audio-player"></div>
+
+    <!-- Footer / Status -->
+    <footer id="status">
+        <div class="status-item">
+            <span class="status-label">Page</span>
+            <span class="status-value" id="current-page-display">1</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Save</span>
+            <span class="status-value" id="save-code">1</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Path</span>
+            <span class="status-value" id="log-content">—</span>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script type="module" src="../ts/engine/main.ts"></script>
+</body>
+</html>

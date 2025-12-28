@@ -1,0 +1,362 @@
+/* CYOA Engine - Shared Styles */
+
+/* CSS Custom Properties for Theming */
+:root {
+    /* Colors - Dark Theme (default) */
+    --color-bg-primary: #1a1a1a;
+    --color-bg-secondary: #151515;
+    --color-bg-tertiary: #0d0d0d;
+    --color-bg-header: #0d0d0d;
+    --color-bg-input: #2a2a2a;
+    --color-bg-button: linear-gradient(180deg, #2a2a2a 0%, #222 100%);
+    --color-bg-button-hover: linear-gradient(180deg, #333 0%, #2a2a2a 100%);
+    --color-bg-button-primary: linear-gradient(180deg, #2d4a2d 0%, #1e3a1e 100%);
+    --color-bg-button-primary-hover: linear-gradient(180deg, #3d5a3d 0%, #2d4a2d 100%);
+    --color-bg-button-danger: linear-gradient(180deg, #4a2d2d 0%, #3a1e1e 100%);
+    --color-bg-button-danger-hover: linear-gradient(180deg, #5a3d3d 0%, #4a2d2d 100%);
+
+    --color-text-primary: #d0d0d0;
+    --color-text-secondary: #888;
+    --color-text-muted: #666;
+    --color-text-dim: #555;
+    --color-text-accent: #8a8;
+    --color-text-choice: #8ac;
+    --color-text-ending: #ca8;
+
+    --color-border-primary: #333;
+    --color-border-secondary: #444;
+    --color-border-focus: #555;
+    --color-border-accent: #3a4a3a;
+
+    --color-scrollbar-track: #1a1a1a;
+    --color-scrollbar-thumb: #333;
+    --color-scrollbar-thumb-hover: #444;
+
+    /* Typography */
+    --font-ui: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --font-story: Georgia, 'Times New Roman', serif;
+    --font-mono: 'Consolas', 'Monaco', monospace;
+
+    --font-size-base: 1rem;
+    --font-size-sm: 0.85rem;
+    --font-size-xs: 0.8rem;
+    --font-size-xxs: 0.75rem;
+    --font-size-story: 1.15rem;
+
+    --line-height-base: 1.5;
+    --line-height-story: 1.85;
+
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+    --spacing-xl: 1.5rem;
+    --spacing-xxl: 2rem;
+
+    /* Border Radius */
+    --radius-sm: 3px;
+    --radius-md: 4px;
+    --radius-lg: 6px;
+    --radius-xl: 8px;
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.2s ease;
+}
+
+/* Light Theme */
+:root.light-theme {
+    --color-bg-primary: #f5f5f5;
+    --color-bg-secondary: #ffffff;
+    --color-bg-tertiary: #e8e8e8;
+    --color-bg-header: #ffffff;
+    --color-bg-input: #ffffff;
+    --color-bg-button: linear-gradient(180deg, #f0f0f0 0%, #e0e0e0 100%);
+    --color-bg-button-hover: linear-gradient(180deg, #e8e8e8 0%, #d8d8d8 100%);
+    --color-bg-button-primary: linear-gradient(180deg, #4a8a4a 0%, #3a7a3a 100%);
+    --color-bg-button-primary-hover: linear-gradient(180deg, #5a9a5a 0%, #4a8a4a 100%);
+    --color-bg-button-danger: linear-gradient(180deg, #c44 0%, #a33 100%);
+    --color-bg-button-danger-hover: linear-gradient(180deg, #d55 0%, #b44 100%);
+
+    --color-text-primary: #333;
+    --color-text-secondary: #666;
+    --color-text-muted: #888;
+    --color-text-dim: #aaa;
+    --color-text-accent: #2a6a2a;
+    --color-text-choice: #2a4a6a;
+    --color-text-ending: #8a4a2a;
+
+    --color-border-primary: #ddd;
+    --color-border-secondary: #ccc;
+    --color-border-focus: #999;
+    --color-border-accent: #4a8a4a;
+
+    --color-scrollbar-track: #f0f0f0;
+    --color-scrollbar-thumb: #ccc;
+    --color-scrollbar-thumb-hover: #bbb;
+}
+
+/* Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: var(--font-ui);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+}
+
+/* Buttons */
+button {
+    background: var(--color-bg-button);
+    color: #ccc;
+    border: 1px solid var(--color-border-primary);
+    padding: 0.4rem 1rem;
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+button:hover {
+    background: var(--color-bg-button-hover);
+    border-color: var(--color-border-secondary);
+    color: #fff;
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+button.primary {
+    background: var(--color-bg-button-primary);
+    border-color: #3d5a3d;
+}
+
+button.primary:hover {
+    background: var(--color-bg-button-primary-hover);
+    border-color: #4d6a4d;
+}
+
+button.danger {
+    background: var(--color-bg-button-danger);
+    border-color: #5a3d3d;
+}
+
+button.danger:hover {
+    background: var(--color-bg-button-danger-hover);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Inputs */
+input, textarea, select {
+    background: var(--color-bg-input);
+    border: 1px solid var(--color-border-secondary);
+    color: var(--color-text-primary);
+    padding: 0.5rem 0.75rem;
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--color-border-focus);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+}
+
+input::placeholder, textarea::placeholder {
+    color: var(--color-text-dim);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-scrollbar-thumb);
+    border-radius: var(--radius-md);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-scrollbar-thumb-hover);
+}
+
+/* Modal */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.visible {
+    display: flex;
+}
+
+.modal {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal h3 {
+    font-size: 1rem;
+    font-weight: 400;
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-text-secondary);
+}
+
+.modal-buttons {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: flex-end;
+    margin-top: var(--spacing-xl);
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.text-mono {
+    font-family: var(--font-mono);
+}
+
+.text-muted {
+    color: var(--color-text-muted);
+}
+
+.text-accent {
+    color: var(--color-text-accent);
+}
+
+/* Keyboard Hint */
+.kbd {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 1px 0 var(--color-border-primary);
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    bottom: var(--spacing-xl);
+    right: var(--spacing-xl);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.toast {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-size-sm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease;
+}
+
+.toast.success {
+    border-left: 3px solid #4a8a4a;
+}
+
+.toast.error {
+    border-left: 3px solid #8a4a4a;
+}
+
+.toast.warning {
+    border-left: 3px solid #8a6a3a;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Loading Spinner */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-border-primary);
+    border-top-color: var(--color-text-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Font Size Controls */
+.font-size-small {
+    --font-size-story: 0.95rem;
+}
+
+.font-size-medium {
+    --font-size-story: 1.15rem;
+}
+
+.font-size-large {
+    --font-size-story: 1.35rem;
+}
+
+.font-size-xlarge {
+    --font-size-story: 1.55rem;
+}
